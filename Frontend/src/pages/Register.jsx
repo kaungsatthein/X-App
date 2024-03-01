@@ -1,12 +1,18 @@
 import React, { useRef, useState } from "react";
 import { TextField, Button, Alert } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [hasError, setHasError] = useState(false);
+  const [ errorMessage, setErrorMessage ] = useState();
+
   const nameRef = useRef();
   const handleRef = useRef();
   const profileRef = useRef();
   const passwordRef = useRef();
+
+  const navigate = useNavigate();
+
   return (
     <>
       <h1>Register</h1>
@@ -18,14 +24,30 @@ export default function Register() {
         const password = passwordRef.current.value;
 
         if(!name || !handle || !password) {
+          setErrorMessage("There are any missing.")
           setHasError(true);
-        } else {
-          console.log(name, handle, profile, password);
-        }
+          return false;
+        } 
+        ( async () => {
+          const api = import.meta.env.VITE_API_URL;
+          const res = await fetch(`${api}/users`,{
+            method: "POST",
+            body: JSON.stringify({ name, handle, profile, password}),
+            headers: {
+              "Content-Type" : "application/json"
+            }
+          })
+          if(!res) {
+            setErrorMessage((await res.json()).msg)
+            setHasError(true);
+            return false;
+          }
+          navigate("/login")
+        })();
       }}>
         {hasError && (
           <Alert severity="warning" sx={{ mb: 4 }}>
-            Name, Handle or password required!
+            {errorMessage}
           </Alert>
         )}
         <TextField

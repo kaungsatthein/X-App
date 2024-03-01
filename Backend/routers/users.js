@@ -17,7 +17,7 @@ const { auth } = require("../middlewares/auth")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-router.post("/verify", auth, (req, res) => {
+router.get("/verify", auth, (req, res) => {
   return res.json(res.locals.user)
 })
 
@@ -60,5 +60,22 @@ router.post("/login", async (req, res) => {
     msg: "Incorrect handle or password",
   });
 });
+
+router.post("/users", async (req, res) => {
+  const { name, handle, profile, password } = req.body;
+  if(!name || !handle || !password) {
+    return res.status(400).json({ msg: "You need to fill all things."})
+  }
+  const hash = await bcrypt.hash(password, 10)
+  const user = {
+    name, handle, profile,
+    password: hash,
+    created: new Date(),
+    followers: []
+  }
+  const result = await xusers.insertOne(user);
+  user.id = result.insertedId;
+  return res.json(result);
+})
 
 module.exports = { userRouter: router };
