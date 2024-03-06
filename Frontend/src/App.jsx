@@ -4,6 +4,7 @@ import Layout from './Layout'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Like from './pages/Like'
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: "/register",
         element: <Register />
+      },
+      {
+        path: "/likes/:id",
+        element: <Like />
       }
     ]
   }

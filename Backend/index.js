@@ -6,8 +6,11 @@ const app = express();
 const cors = require("cors")
 app.use(cors());
 
-const { userRouter } = require("./routers/users")
-app.use(userRouter);
+const { usersRouter } = require("./routers/users")
+app.use(usersRouter);
+
+const { postsRouter } = require("./routers/posts")
+app.use(postsRouter);
 
 app.listen(process.env.PORT, () => {
     console.log(`X api is running as ${process.env.PORT}`);

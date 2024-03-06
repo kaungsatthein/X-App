@@ -11,19 +11,28 @@ const { MongoClient, ObjectId } = require("mongodb");
 const mongo = new MongoClient(process.env.MONGO_HOST);
 const xdb = mongo.db("x");
 const xusers = xdb.collection("users");
+const xposts = xdb.collection("posts");
 
-const { auth } = require("../middlewares/auth")
+const { auth } = require("../middlewares/auth");
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 router.get("/verify", auth, (req, res) => {
-  return res.json(res.locals.user)
-})
+  return res.json(res.locals.user);
+});
 
 router.get("/users", auth, async (req, res) => {
   const data = await xusers.find().project({ password: 0 }).limit(20).toArray();
   return res.json(data);
+});
+
+router.get("/users/likes/:id", async (req, res) => {
+  const { id } = req.params;
+  const post = await xposts.findOne({ _id: new ObjectId(id) });
+
+  const users = await xusers.find({ _id: { $in: post.likes } }).toArray();
+  return res.json(users);
 });
 
 router.get("/users/:id", async (req, res) => {
@@ -63,19 +72,21 @@ router.post("/login", async (req, res) => {
 
 router.post("/users", async (req, res) => {
   const { name, handle, profile, password } = req.body;
-  if(!name || !handle || !password) {
-    return res.status(400).json({ msg: "You need to fill all things."})
+  if (!name || !handle || !password) {
+    return res.status(400).json({ msg: "You need to fill all things." });
   }
-  const hash = await bcrypt.hash(password, 10)
+  const hash = await bcrypt.hash(password, 10);
   const user = {
-    name, handle, profile,
+    name,
+    handle,
+    profile,
     password: hash,
     created: new Date(),
-    followers: []
-  }
+    followers: [],
+  };
   const result = await xusers.insertOne(user);
   user.id = result.insertedId;
   return res.json(result);
-})
+});
 
-module.exports = { userRouter: router };
+module.exports = { usersRouter: router };

@@ -9,7 +9,7 @@ export default function Layout() {
     <>
       <AppDrawer />
       <NavBar />
-      <Container maxWidth="sm">
+      <Container maxWidth="sm" sx={{ mt: 4 }}>
         <Outlet />
       </Container>
     </>
